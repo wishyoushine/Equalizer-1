@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import mehdi.sakout.aboutpage.AboutPage;
+import mehdi.sakout.aboutpage.Element;
 
 public class AboutActivity extends AppCompatActivity {
 
@@ -16,6 +17,18 @@ public class AboutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_about);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        Element license = new Element();
+        license.setTitle("Open Source Licenses");
+
+        license.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LicensesDialogFragment dialog = LicensesDialogFragment.newInstance();
+                dialog.show(getSupportFragmentManager(), "LicensesDialog");
+
+            }
+        });
+
         View aboutPage = new AboutPage(this)
                 .isRTL(false)
                 .setImage(R.mipmap.ic_launcher_round).setDescription("An open source, light weight Equalizer for all devices.").
@@ -23,6 +36,7 @@ public class AboutActivity extends AppCompatActivity {
                 .addEmail("jazib27@hotmail.com")
                 .addPlayStore("com.jazibkhan.equalizer")
                 .addGitHub("JazibOfficial/Equalizer")
+                .addItem(license)
                 .create();
 
         setContentView(aboutPage);
