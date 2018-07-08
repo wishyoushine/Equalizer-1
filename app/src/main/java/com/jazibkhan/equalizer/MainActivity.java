@@ -21,6 +21,7 @@ import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.marcinmoskala.arcseekbar.ArcSeekBar;
 import com.marcinmoskala.arcseekbar.ProgressListener;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     ArcSeekBar bassSlider,virtualSlider;
     TextView slider_labels[] = new TextView[MAX_SLIDERS];
     int num_sliders = 0;
+    boolean canEnable;
 
 
     @Override
@@ -50,181 +52,189 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         setContentView(R.layout.activity_main);
 
 
-        enabled =(Switch) findViewById(R.id.switchEnable);
+        enabled = (Switch) findViewById(R.id.switchEnable);
         enabled.setChecked(true);
 
-        sliders[0] = (SeekBar)findViewById(R.id.mySeekBar0);
-        slider_labels[0] = (TextView)findViewById(R.id.centerFreq0);
-        sliders[1] = (SeekBar)findViewById(R.id.mySeekBar1);
-        slider_labels[1] = (TextView)findViewById(R.id.centerFreq1);
-        sliders[2] = (SeekBar)findViewById(R.id.mySeekBar2);
-        slider_labels[2] = (TextView)findViewById(R.id.centerFreq2);
-        sliders[3] = (SeekBar)findViewById(R.id.mySeekBar3);
-        slider_labels[3] = (TextView)findViewById(R.id.centerFreq3);
-        sliders[4] = (SeekBar)findViewById(R.id.mySeekBar4);
-        slider_labels[4] = (TextView)findViewById(R.id.centerFreq4);
-        bassSlider=(ArcSeekBar) findViewById(R.id.bassSeekBar);
-        virtualSlider=(ArcSeekBar) findViewById(R.id.virtualSeekBar);
-        enableBass=(Switch) findViewById(R.id.bassSwitch);
-        enableVirtual=(Switch) findViewById(R.id.virtualSwitch);
+        sliders[0] = (SeekBar) findViewById(R.id.mySeekBar0);
+        slider_labels[0] = (TextView) findViewById(R.id.centerFreq0);
+        sliders[1] = (SeekBar) findViewById(R.id.mySeekBar1);
+        slider_labels[1] = (TextView) findViewById(R.id.centerFreq1);
+        sliders[2] = (SeekBar) findViewById(R.id.mySeekBar2);
+        slider_labels[2] = (TextView) findViewById(R.id.centerFreq2);
+        sliders[3] = (SeekBar) findViewById(R.id.mySeekBar3);
+        slider_labels[3] = (TextView) findViewById(R.id.centerFreq3);
+        sliders[4] = (SeekBar) findViewById(R.id.mySeekBar4);
+        slider_labels[4] = (TextView) findViewById(R.id.centerFreq4);
+        bassSlider = (ArcSeekBar) findViewById(R.id.bassSeekBar);
+        virtualSlider = (ArcSeekBar) findViewById(R.id.virtualSeekBar);
+        enableBass = (Switch) findViewById(R.id.bassSwitch);
+        enableVirtual = (Switch) findViewById(R.id.virtualSwitch);
         bassSlider.setMaxProgress(1000);
         virtualSlider.setMaxProgress(1000);
         enableBass.setChecked(true);
         enableVirtual.setChecked(true);
 
 
-
-
-        eq = new Equalizer (0, 0);
-        if (eq != null)
-        {
+        eq = new Equalizer(0, 0);
+        if (eq != null) {
             int num_bands = eq.getNumberOfBands();
             num_sliders = num_bands;
             short r[] = eq.getBandLevelRange();
             min_level = r[0];
             max_level = r[1];
-            for (int i = 0; i < num_sliders && i < MAX_SLIDERS; i++)
-            {
-                int freq_range = eq.getCenterFreq((short)i);
+            for (int i = 0; i < num_sliders && i < MAX_SLIDERS; i++) {
+                int freq_range = eq.getCenterFreq((short) i);
                 sliders[i].setOnSeekBarChangeListener(this);
-                slider_labels[i].setText (milliHzToString(freq_range));
+                slider_labels[i].setText(milliHzToString(freq_range));
             }
         }
 
-        bb = new BassBoost (0, 0);
-        virtualizer = new Virtualizer (0, 0);
+        bb = new BassBoost(0, 0);
+        virtualizer = new Virtualizer(0, 0);
 
 
         SharedPreferences myPreferences
                 = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor myEditor = myPreferences.edit();
-        if(!myPreferences.contains("initial")) {
+        if (!myPreferences.contains("initial")) {
             myEditor.putBoolean("initial", true);
             myEditor.putBoolean("eqswitch", true);
             myEditor.putBoolean("bbswitch", true);
             myEditor.putBoolean("virswitch", true);
-            myEditor.putInt("bbslider", (int)bb.getRoundedStrength());
-            myEditor.putInt("virslider", (int)virtualizer.getRoundedStrength());
-            myEditor.putInt("slider0", 100 * eq.getBandLevel((short)0) / (max_level - min_level) + 50);
-            myEditor.putInt("slider1", 100 * eq.getBandLevel((short)1) / (max_level - min_level) + 50);
-            myEditor.putInt("slider2", 100 * eq.getBandLevel((short)2) / (max_level - min_level) + 50);
-            myEditor.putInt("slider3", 100 * eq.getBandLevel((short)3) / (max_level - min_level) + 50);
-            myEditor.putInt("slider4", 100 * eq.getBandLevel((short)4) / (max_level - min_level) + 50);
+            myEditor.putInt("bbslider", (int) bb.getRoundedStrength());
+            myEditor.putInt("virslider", (int) virtualizer.getRoundedStrength());
+            myEditor.putInt("slider0", 100 * eq.getBandLevel((short) 0) / (max_level - min_level) + 50);
+            myEditor.putInt("slider1", 100 * eq.getBandLevel((short) 1) / (max_level - min_level) + 50);
+            myEditor.putInt("slider2", 100 * eq.getBandLevel((short) 2) / (max_level - min_level) + 50);
+            myEditor.putInt("slider3", 100 * eq.getBandLevel((short) 3) / (max_level - min_level) + 50);
+            myEditor.putInt("slider4", 100 * eq.getBandLevel((short) 4) / (max_level - min_level) + 50);
             myEditor.commit();
         }
 
-        updateUI();
-
+        try {
+            updateUI();
+            canEnable = true;
+        } catch (Throwable e) {
+            disableEvery();
+            e.printStackTrace();
+        }
 
 
         virtualSlider.setOnProgressChangedListener(new ProgressListener() {
             @Override
             public void invoke(int j) {
-                virtualizer.setStrength((short)j);
-                saveChanges();
+                if (canEnable) {
+                    virtualizer.setStrength((short) j);
+                    saveChanges();
+                }
+                else disableEvery();
             }
         });
 
         bassSlider.setOnProgressChangedListener(new ProgressListener() {
             @Override
             public void invoke(int i) {
-                Log.d("WOW", "level bass slider*************************** "+(short)i );
-                bb.setStrength((short)i);
-                Log.d("WOW", "set progress actual bass level *************************** "+bb.getRoundedStrength() );
-                saveChanges();
+                if (canEnable) {
+                    Log.d("WOW", "level bass slider*************************** " + (short) i);
+                    bb.setStrength((short) i);
+                    Log.d("WOW", "set progress actual bass level *************************** " + bb.getRoundedStrength());
+                    saveChanges();
+                }
+                else disableEvery();
             }
         });
-        if (virtualizer != null)
-        {
+        if (virtualizer != null) {
             enableVirtual.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if(enableVirtual.isChecked()){
-                        virtualizer.setEnabled(true);
-                        virtualSlider.setEnabled(true);
-                        virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.colorAccent));
-                        saveChanges();
+                    if(canEnable) {
+                        if (enableVirtual.isChecked()) {
+                            virtualizer.setEnabled(true);
+                            virtualSlider.setEnabled(true);
+                            virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.colorAccent));
+                            saveChanges();
+                        } else {
+                            virtualizer.setEnabled(false);
+                            virtualSlider.setEnabled(false);
+                            virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
+                            saveChanges();
+                        }
+                        if (enabled.isChecked() || enableBass.isChecked() || enableVirtual.isChecked()) {
+                            Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
+                            startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+                            startService(startIntent);
+                        } else {
+                            Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
+                            stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+                            startService(stopIntent);
+                        }
                     }
-                    else{
-                        virtualizer.setEnabled(false);
-                        virtualSlider.setEnabled(false);
-                        virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
-                        saveChanges();
-                    }
-                    if(enabled.isChecked()||enableBass.isChecked()||enableVirtual.isChecked()){
-                        Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
-                        startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-                        startService(startIntent);
-                    }
-                    else{
-                        Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
-                        stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
-                        startService(stopIntent);
-                    }
+                    else disableEvery();
                 }
             });
         }
-        if (bb != null)
-        {
+        if (bb != null) {
             enableBass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if(enableBass.isChecked()){
-                        bb.setEnabled(true);
-                        bassSlider.setEnabled(true);
-                        bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.colorAccent));
-                        saveChanges();
+                    if(canEnable) {
+                        if (enableBass.isChecked()) {
+                            bb.setEnabled(true);
+                            bassSlider.setEnabled(true);
+                            bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.colorAccent));
+                            saveChanges();
+                        } else {
+                            bb.setEnabled(false);
+                            bassSlider.setEnabled(false);
+                            bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
+                            saveChanges();
+                        }
+                        if (enabled.isChecked() || enableBass.isChecked() || enableVirtual.isChecked()) {
+                            Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
+                            startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+                            startService(startIntent);
+                        } else {
+                            Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
+                            stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+                            startService(stopIntent);
+                        }
                     }
-                    else{
-                        bb.setEnabled(false);
-                        bassSlider.setEnabled(false);
-                        bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
+                    else disableEvery();
+                }
+            });
+        }
+        if(eq!=null){enabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(canEnable) {
+                    if (enabled.isChecked()) {
+                        eq.setEnabled(true);
                         saveChanges();
+                        for (int i = 0; i < 5; i++) {
+                            sliders[i].setEnabled(true);
+                        }
+                    } else {
+                        eq.setEnabled(false);
+                        saveChanges();
+                        for (int i = 0; i < 5; i++) {
+                            sliders[i].setEnabled(false);
+                        }
                     }
-                    if(enabled.isChecked()||enableBass.isChecked()||enableVirtual.isChecked()){
+                    if (enabled.isChecked() || enableBass.isChecked() || enableVirtual.isChecked()) {
                         Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
                         startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
                         startService(startIntent);
-                    }
-                    else{
+                    } else {
                         Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
                         stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
                         startService(stopIntent);
                     }
-                }
-            });
-        }
-        enabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(enabled.isChecked()){
-                    eq.setEnabled(true);
-                    saveChanges();
-                    for(int i=0;i<5;i++){
-                        sliders[i].setEnabled(true);
-                    }
-                }
-                else {eq.setEnabled(false);
-                        saveChanges();
-                    for(int i=0;i<5;i++){
-                        sliders[i].setEnabled(false);
-                    }
-                }
-                if(enabled.isChecked()||enableBass.isChecked()||enableVirtual.isChecked()){
-                    Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
-                    startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-                    startService(startIntent);
-                }
-                else{
-                    Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
-                    stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
-                    startService(stopIntent);
-                }
 
-
-
+                }
+                else disableEvery();
             }
         });
+    }
     }
 
 
@@ -242,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     @Override
     public void onProgressChanged(SeekBar seekBar, int level, boolean b) {
 
-        if (eq != null)
+        if (eq != null&&canEnable)
         {
             int new_level=min_level+(max_level-min_level)*level / 100;
 
@@ -409,6 +419,23 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         virtualizer.setStrength((short)myPreferences.getInt("virslider",0));
         Log.d("WOW", "bass level *************************** "+(short)myPreferences.getInt("bbslider",0) );
         Log.d("WOW", "virtualizer level *************************** "+(short)myPreferences.getInt("virslider",0) );
+    }
+    public  void disableEvery(){
+        Toast.makeText(this, "Disable other Equalizers before enabling this",
+                Toast.LENGTH_LONG).show();
+        enabled.setChecked(false);
+        enableVirtual.setChecked(false);
+        enableBass.setChecked(false);
+        canEnable = false;
+        virtualizer.setEnabled(false);
+        virtualSlider.setEnabled(false);
+        virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
+        bassSlider.setEnabled(false);
+        bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
+        bb.setEnabled(false);
+        for(int i=0;i<5;i++)
+            sliders[i].setEnabled(false);
+        eq.setEnabled(false);
     }
 
 
