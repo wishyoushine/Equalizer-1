@@ -23,6 +23,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.marcinmoskala.arcseekbar.ArcSeekBar;
 import com.marcinmoskala.arcseekbar.ProgressListener;
 
@@ -44,12 +47,18 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     TextView slider_labels[] = new TextView[MAX_SLIDERS];
     int num_sliders = 0;
     boolean canEnable;
+    private AdView mAdView;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MobileAds.initialize(this, "ca-app-pub-3247504109469111~8021644228");
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
 
         enabled = (Switch) findViewById(R.id.switchEnable);
@@ -75,7 +84,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         enableVirtual.setChecked(true);
 
 
-        eq = new Equalizer(0, 0);
+
+        eq = new Equalizer(100, 0);
+        bb = new BassBoost(100, 0);
+        virtualizer = new Virtualizer(100, 0);
+
+
         if (eq != null) {
             int num_bands = eq.getNumberOfBands();
             num_sliders = num_bands;
@@ -89,8 +103,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             }
         }
 
-        bb = new BassBoost(0, 0);
-        virtualizer = new Virtualizer(0, 0);
+
 
 
         SharedPreferences myPreferences

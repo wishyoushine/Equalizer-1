@@ -51,7 +51,7 @@ public class ForegroundService extends Service{
             stopForeground(true);
             stopSelf();
         }
-        return START_STICKY;
+        return START_REDELIVER_INTENT;
     }
 
     @Override
