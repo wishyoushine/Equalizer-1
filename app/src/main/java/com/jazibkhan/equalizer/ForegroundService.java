@@ -1,9 +1,12 @@
 package com.jazibkhan.equalizer;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -17,10 +20,12 @@ public class ForegroundService extends Service{
 
 
     private static final String LOG_TAG = "ForegroundService";
+    String CHANNEL_ID="myChannel";
 
     @Override
     public void onCreate() {
         super.onCreate();
+        createNotificationChannel();
     }
 
     @Override
@@ -35,14 +40,14 @@ public class ForegroundService extends Service{
                     notificationIntent, 0);
 
 
-            Notification notification = new NotificationCompat.Builder(this)
-                    .setContentTitle("Flat Equalizer")
-                    .setTicker("Equalizer")
-                    .setContentText("Foreground Service")
-                    .setContentIntent(pendingIntent)
-                    .setOngoing(true).build();
+            Notification notification = new NotificationCompat.Builder(this,CHANNEL_ID).setSmallIcon(R.drawable.equilizerbars)
+                    .setContentTitle("Equalizer")
+                    .setContentText("Equilizer is enabled")
+                    .setContentIntent(pendingIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOngoing(true)
+                    .build();
             startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE,
                     notification);
+            Log.i("WOW", "BUILDED NOTIFICATION ");
         }
 
         else if (intent.getAction().equals(
@@ -52,6 +57,22 @@ public class ForegroundService extends Service{
             stopSelf();
         }
         return START_REDELIVER_INTENT;
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Equilizer";
+            String description = "Equilizer is enabled";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Override
