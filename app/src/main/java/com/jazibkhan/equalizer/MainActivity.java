@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.marcinmoskala.arcseekbar.ArcSeekBar;
 import com.marcinmoskala.arcseekbar.ProgressListener;
 
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
         MobileAds.initialize(this, "ca-app-pub-3247504109469111~8021644228");
         mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
+        AdRequest adRequest = new AdRequest.Builder().addTestDevice("9CAE76FEB9BFA8EA6723EEED1660711A").build();
         mAdView.loadAd(adRequest);
 
 

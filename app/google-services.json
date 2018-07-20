@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "618249415687",
+    "firebase_url": "https://equilizer-32cbf.firebaseio.com",
+    "project_id": "equilizer-32cbf",
+    "storage_bucket": "equilizer-32cbf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618249415687:android:190e8addd4102dc8",
+        "android_client_info": {
+          "package_name": "com.jazibkhan.equalizer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "618249415687-gt3mabfu0jtk90t5kr1s1snnqr05vrkl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jazibkhan.equalizer",
+            "certificate_hash": "96ee016c9face10485f932027ae3dc3254772e7f"
+          }
+        },
+        {
+          "client_id": "618249415687-d59ncghp9c11nc44rd4ab11hrshekdos.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcSvCg9P9Yqo63_CZCQ4SS9otIfMSH1Z8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "618249415687-d59ncghp9c11nc44rd4ab11hrshekdos.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
