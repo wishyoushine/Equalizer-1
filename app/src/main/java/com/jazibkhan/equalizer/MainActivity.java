@@ -15,10 +15,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,10 +33,13 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.marcinmoskala.arcseekbar.ArcSeekBar;
 import com.marcinmoskala.arcseekbar.ProgressListener;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
 
     Switch enabled = null;
     Switch enableBass, enableVirtual;
+    Spinner spinner;
 
     Equalizer eq = null;
     BassBoost bb = null;
@@ -44,11 +50,14 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     static final int MAX_SLIDERS = 5; // Must match the XML layout
     SeekBar sliders[] = new SeekBar[MAX_SLIDERS];
-    ArcSeekBar bassSlider,virtualSlider;
+    ArcSeekBar bassSlider, virtualSlider;
     TextView slider_labels[] = new TextView[MAX_SLIDERS];
     int num_sliders = 0;
     boolean canEnable;
     private AdView mAdView;
+    ArrayList<String> eqPreset;
+    int spinnerPos = 0;
+    boolean dontcall=false;
 
 
     @Override
@@ -64,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
         enabled = (Switch) findViewById(R.id.switchEnable);
         enabled.setChecked(true);
-
+        spinner = findViewById(R.id.spinner);
         sliders[0] = (SeekBar) findViewById(R.id.mySeekBar0);
         slider_labels[0] = (TextView) findViewById(R.id.centerFreq0);
         sliders[1] = (SeekBar) findViewById(R.id.mySeekBar1);
@@ -84,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         enableBass.setChecked(true);
         enableVirtual.setChecked(true);
 
+        eqPreset = new ArrayList<String>();
+        final ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, eqPreset);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 
         eq = new Equalizer(100, 0);
@@ -102,9 +114,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 sliders[i].setOnSeekBarChangeListener(this);
                 slider_labels[i].setText(milliHzToString(freq_range));
             }
+            for (short i = 0; i < eq.getNumberOfPresets(); i++) {
+                eqPreset.add(eq.getPresetName(i));
+            }
+            eqPreset.add("Custom");
+            spinner.setAdapter(spinnerAdapter);
         }
-
-
 
 
         SharedPreferences myPreferences
@@ -122,7 +137,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             myEditor.putInt("slider2", 100 * eq.getBandLevel((short) 2) / (max_level - min_level) + 50);
             myEditor.putInt("slider3", 100 * eq.getBandLevel((short) 3) / (max_level - min_level) + 50);
             myEditor.putInt("slider4", 100 * eq.getBandLevel((short) 4) / (max_level - min_level) + 50);
-            myEditor.commit();
+            myEditor.putInt("spinnerpos", 0);
+            myEditor.apply();
         }
 
         try {
@@ -134,14 +150,39 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         }
 
 
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i < eqPreset.size() - 1) {
+                    eq.usePreset((short) i);
+                    spinnerPos = i;
+                    updateSliders();
+                    saveChanges();
+                }
+                else {
+                    dontcall=true;
+                    spinnerPos = i;
+                    saveChanges();
+                    applyChanges();
+                    updateSliders();
+                    dontcall=false;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
         virtualSlider.setOnProgressChangedListener(new ProgressListener() {
             @Override
             public void invoke(int j) {
                 if (canEnable) {
                     virtualizer.setStrength((short) j);
                     saveChanges();
-                }
-                else disableEvery();
+                } else disableEvery();
             }
         });
 
@@ -149,19 +190,18 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             @Override
             public void invoke(int i) {
                 if (canEnable) {
-                    Log.d("WOW", "level bass slider*************************** " + (short) i);
+         //           Log.d("WOW", "level bass slider*************************** " + (short) i);
                     bb.setStrength((short) i);
-                    Log.d("WOW", "set progress actual bass level *************************** " + bb.getRoundedStrength());
+         //           Log.d("WOW", "set progress actual bass level *************************** " + bb.getRoundedStrength());
                     saveChanges();
-                }
-                else disableEvery();
+                } else disableEvery();
             }
         });
         if (virtualizer != null) {
             enableVirtual.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if(canEnable) {
+                    if (canEnable) {
                         if (enableVirtual.isChecked()) {
                             virtualizer.setEnabled(true);
                             virtualSlider.setEnabled(true);
@@ -182,8 +222,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
                             startService(stopIntent);
                         }
-                    }
-                    else disableEvery();
+                    } else disableEvery();
                 }
             });
         }
@@ -191,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             enableBass.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if(canEnable) {
+                    if (canEnable) {
                         if (enableBass.isChecked()) {
                             bb.setEnabled(true);
                             bassSlider.setEnabled(true);
@@ -212,48 +251,48 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                             stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
                             startService(stopIntent);
                         }
-                    }
-                    else disableEvery();
+                    } else disableEvery();
                 }
             });
         }
-        if(eq!=null){enabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if(canEnable) {
-                    if (enabled.isChecked()) {
-                        eq.setEnabled(true);
-                        saveChanges();
-                        for (int i = 0; i < 5; i++) {
-                            sliders[i].setEnabled(true);
+        if (eq != null) {
+            enabled.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if (canEnable) {
+                        if (enabled.isChecked()) {
+                            spinner.setEnabled(true);
+                            eq.setEnabled(true);
+                            saveChanges();
+                            for (int i = 0; i < 5; i++) {
+                                sliders[i].setEnabled(true);
+                            }
+                        } else {
+                            spinner.setEnabled(false);
+                            eq.setEnabled(false);
+                            saveChanges();
+                            for (int i = 0; i < 5; i++) {
+                                sliders[i].setEnabled(false);
+                            }
                         }
-                    } else {
-                        eq.setEnabled(false);
-                        saveChanges();
-                        for (int i = 0; i < 5; i++) {
-                            sliders[i].setEnabled(false);
+                        if (enabled.isChecked() || enableBass.isChecked() || enableVirtual.isChecked()) {
+                            Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
+                            startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+                            startService(startIntent);
+                        } else {
+                            Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
+                            stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+                            startService(stopIntent);
                         }
-                    }
-                    if (enabled.isChecked() || enableBass.isChecked() || enableVirtual.isChecked()) {
-                        Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
-                        startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-                        startService(startIntent);
-                    } else {
-                        Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
-                        stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
-                        startService(stopIntent);
-                    }
 
+                    } else disableEvery();
                 }
-                else disableEvery();
-            }
-        });
-    }
+            });
+        }
     }
 
 
-    public String milliHzToString (int milliHz)
-    {
+    public String milliHzToString(int milliHz) {
         if (milliHz < 1000) return "";
         if (milliHz < 1000000)
             return "" + (milliHz / 1000) + "Hz";
@@ -262,19 +301,15 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
 
-
     @Override
     public void onProgressChanged(SeekBar seekBar, int level, boolean b) {
 
-        if (eq != null&&canEnable)
-        {
-            int new_level=min_level+(max_level-min_level)*level / 100;
+        if (eq != null && canEnable) {
+            int new_level = min_level + (max_level - min_level) * level / 100;
 
-            for (int i=0;i<num_sliders;i++)
-            {
-                if (sliders[i]==seekBar)
-                {
-                    eq.setBandLevel((short)i,(short)new_level);
+            for (int i = 0; i < num_sliders; i++) {
+                if (sliders[i] == seekBar) {
+                    eq.setBandLevel((short) i, (short) new_level);
                     saveChanges();
                     break;
                 }
@@ -285,7 +320,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-
+        spinner.setSelection(eqPreset.size() - 1);
+        spinnerPos=eqPreset.size()-1;
     }
 
     @Override
@@ -318,87 +354,82 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
 
-    public void updateUI (){
+    public void updateUI() {
         applyChanges();
-        if(enabled.isChecked()||enableBass.isChecked()||enableVirtual.isChecked()){
+        if (enabled.isChecked() || enableBass.isChecked() || enableVirtual.isChecked()) {
             Intent startIntent = new Intent(MainActivity.this, ForegroundService.class);
             startIntent.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
             startService(startIntent);
-        }
-        else{
+        } else {
             Intent stopIntent = new Intent(MainActivity.this, ForegroundService.class);
             stopIntent.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
             startService(stopIntent);
         }
 
-        if(enableBass.isChecked()){
+        if (enableBass.isChecked()) {
             bassSlider.setEnabled(true);
             bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.colorAccent));
             bb.setEnabled(true);
-            }
-            else{
+        } else {
             bassSlider.setEnabled(false);
             bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
             bb.setEnabled(false);
         }
-        if(enableVirtual.isChecked()){
+        if (enableVirtual.isChecked()) {
             virtualizer.setEnabled(true);
             virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.colorAccent));
-        virtualSlider.setEnabled(true);
-        }
-        else {
+            virtualSlider.setEnabled(true);
+        } else {
             virtualizer.setEnabled(false);
             virtualSlider.setEnabled(false);
             virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
         }
 
-        if(enabled.isChecked()){
-            for(int i=0;i<5;i++)
+        if (enabled.isChecked()) {
+            spinner.setEnabled(true);
+            for (int i = 0; i < 5; i++)
                 sliders[i].setEnabled(true);
             eq.setEnabled(true);
-        }
-        else{
-            for(int i=0;i<5;i++)
+        } else {
+            spinner.setEnabled(false);
+            for (int i = 0; i < 5; i++)
                 sliders[i].setEnabled(false);
             eq.setEnabled(false);
         }
+        spinner.setSelection(spinnerPos);
         updateSliders();
         updateBassBoost();
         updateVirtualizer();
 
     }
 
-    public void updateSliders ()
-    {
-        for (int i = 0; i < num_sliders; i++)
-        {
+    public void updateSliders() {
+        for (int i = 0; i < num_sliders; i++) {
             int level;
             if (eq != null)
-                level = eq.getBandLevel ((short)i);
+                level = eq.getBandLevel((short) i);
             else
                 level = 0;
             int pos = 100 * level / (max_level - min_level) + 50;
-            sliders[i].setProgress (pos);
+            sliders[i].setProgress(pos);
         }
     }
 
-    public void updateBassBoost ()
-    {
+    public void updateBassBoost() {
         if (bb != null)
-            bassSlider.setProgress (bb.getRoundedStrength());
+            bassSlider.setProgress(bb.getRoundedStrength());
         else
             bassSlider.setProgress(0);
     }
 
-    public void updateVirtualizer ()
-    {
+    public void updateVirtualizer() {
         if (virtualizer != null)
-            virtualSlider.setProgress (virtualizer.getRoundedStrength());
+            virtualSlider.setProgress(virtualizer.getRoundedStrength());
         else
-            virtualSlider.setProgress (0);
+            virtualSlider.setProgress(0);
     }
 
-    public void saveChanges(){
+    public void saveChanges() {
         SharedPreferences myPreferences
                 = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor myEditor = myPreferences.edit();
@@ -406,37 +437,62 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         myEditor.putBoolean("eqswitch", enabled.isChecked());
         myEditor.putBoolean("bbswitch", enableBass.isChecked());
         myEditor.putBoolean("virswitch", enableVirtual.isChecked());
-        Log.d("WOW", "actual bass level *************************** "+bb.getRoundedStrength());
-        Log.d("WOW", "actual vir level *************************** "+ virtualizer.getRoundedStrength() );
+ //       Log.d("WOW", "actual bass level *************************** " + bb.getRoundedStrength());
+ //       Log.d("WOW", "actual vir level *************************** " + virtualizer.getRoundedStrength());
+        myEditor.putInt("spinnerpos", spinnerPos);
+        myEditor.putInt("bbslider", (int) bb.getRoundedStrength());
+        myEditor.putInt("virslider", (int) virtualizer.getRoundedStrength());
 
-        myEditor.putInt("bbslider", (int)bb.getRoundedStrength());
-        myEditor.putInt("virslider", (int)virtualizer.getRoundedStrength());
-        myEditor.putInt("slider0", 100 * eq.getBandLevel((short)0) / (max_level - min_level) + 50);
-        myEditor.putInt("slider1", 100 * eq.getBandLevel((short)1) / (max_level - min_level) + 50);
-        myEditor.putInt("slider2", 100 * eq.getBandLevel((short)2) / (max_level - min_level) + 50);
-        myEditor.putInt("slider3", 100 * eq.getBandLevel((short)3) / (max_level - min_level) + 50);
-        myEditor.putInt("slider4", 100 * eq.getBandLevel((short)4) / (max_level - min_level) + 50);
-        myEditor.commit();
+        if((spinnerPos == eqPreset.size() - 1)&&!dontcall) {
+            myEditor.putInt("slider0", 100 * eq.getBandLevel((short) 0) / (max_level - min_level) + 50);
+            myEditor.putInt("slider1", 100 * eq.getBandLevel((short) 1) / (max_level - min_level) + 50);
+            myEditor.putInt("slider2", 100 * eq.getBandLevel((short) 2) / (max_level - min_level) + 50);
+            myEditor.putInt("slider3", 100 * eq.getBandLevel((short) 3) / (max_level - min_level) + 50);
+            myEditor.putInt("slider4", 100 * eq.getBandLevel((short) 4) / (max_level - min_level) + 50);
+        }
+
+        Log.d("WOW", "spinnerPos *************************** "+spinnerPos);
+        Log.d("WOW", "eqPreset *************************** "+(eqPreset.size()-1));
+        Log.d("WOW", "BAND LEVEL *************************** "+myPreferences.getInt("slider0",0));
+        myEditor.apply();
+        Log.d("WOW", "BAND LEVEL *************************** "+myPreferences.getInt("slider0",0));
     }
-    public void applyChanges(){
+
+
+
+
+
+
+
+
+    public void applyChanges() {
         SharedPreferences myPreferences
-            = PreferenceManager.getDefaultSharedPreferences(this);
-        enabled.setChecked(myPreferences.getBoolean("eqswitch",true));
-        enableBass.setChecked(myPreferences.getBoolean("bbswitch",true));
-        enableVirtual.setChecked(myPreferences.getBoolean("virswitch",true));
-        eq.setBandLevel((short)0,(short)(min_level+(max_level-min_level)*myPreferences.getInt("slider0",0) / 100));
-        eq.setBandLevel((short)1,(short)(min_level+(max_level-min_level)*myPreferences.getInt("slider1",0) / 100));
-        eq.setBandLevel((short)2,(short)(min_level+(max_level-min_level)*myPreferences.getInt("slider2",0) / 100));
-        eq.setBandLevel((short)3,(short)(min_level+(max_level-min_level)*myPreferences.getInt("slider3",0) / 100));
-        eq.setBandLevel((short)4,(short)(min_level+(max_level-min_level)*myPreferences.getInt("slider4",0) / 100));
-        bb.setStrength((short)myPreferences.getInt("bbslider",0));
-        virtualizer.setStrength((short)myPreferences.getInt("virslider",0));
-        Log.d("WOW", "bass level *************************** "+(short)myPreferences.getInt("bbslider",0) );
-        Log.d("WOW", "virtualizer level *************************** "+(short)myPreferences.getInt("virslider",0) );
+                = PreferenceManager.getDefaultSharedPreferences(this);
+        spinnerPos = myPreferences.getInt("spinnerpos", 0);
+        enabled.setChecked(myPreferences.getBoolean("eqswitch", true));
+        enableBass.setChecked(myPreferences.getBoolean("bbswitch", true));
+        enableVirtual.setChecked(myPreferences.getBoolean("virswitch", true));
+        bb.setStrength((short) myPreferences.getInt("bbslider", 0));
+        virtualizer.setStrength((short) myPreferences.getInt("virslider", 0));
+        if (spinnerPos != eqPreset.size() - 1){
+            eq.usePreset((short) spinnerPos);
+        }
+        else{
+            eq.setBandLevel((short) 0, (short) (min_level + (max_level - min_level) * myPreferences.getInt("slider0", 0) / 100));
+            eq.setBandLevel((short) 1, (short) (min_level + (max_level - min_level) * myPreferences.getInt("slider1", 0) / 100));
+            eq.setBandLevel((short) 2, (short) (min_level + (max_level - min_level) * myPreferences.getInt("slider2", 0) / 100));
+            eq.setBandLevel((short) 3, (short) (min_level + (max_level - min_level) * myPreferences.getInt("slider3", 0) / 100));
+            eq.setBandLevel((short) 4, (short) (min_level + (max_level - min_level) * myPreferences.getInt("slider4", 0) / 100));
+        }
+
+ //       Log.d("WOW", "bass level *************************** " + (short) myPreferences.getInt("bbslider", 0));
+ //       Log.d("WOW", "virtualizer level *************************** " + (short) myPreferences.getInt("virslider", 0));
     }
-    public  void disableEvery(){
+
+    public void disableEvery() {
         Toast.makeText(this, "Disable other Equalizers before enabling this",
                 Toast.LENGTH_LONG).show();
+        spinner.setEnabled(false);
         enabled.setChecked(false);
         enableVirtual.setChecked(false);
         enableBass.setChecked(false);
@@ -447,7 +503,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         bassSlider.setEnabled(false);
         bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
         bb.setEnabled(false);
-        for(int i=0;i<5;i++)
+        for (int i = 0; i < 5; i++)
             sliders[i].setEnabled(false);
         eq.setEnabled(false);
     }

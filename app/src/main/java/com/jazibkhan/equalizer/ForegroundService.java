@@ -40,7 +40,7 @@ public class ForegroundService extends Service{
                     notificationIntent, 0);
 
 
-            Notification notification = new NotificationCompat.Builder(this,CHANNEL_ID).setSmallIcon(R.drawable.equilizerbars)
+            Notification notification = new NotificationCompat.Builder(this,CHANNEL_ID).setSmallIcon(R.drawable.eq_icon)
                     .setContentTitle("Equalizer")
                     .setContentText("Equilizer is enabled")
                     .setContentIntent(pendingIntent).setPriority(NotificationCompat.PRIORITY_HIGH).setOngoing(true)
