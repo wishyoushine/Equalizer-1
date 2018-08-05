@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Equalizer</string>
+    <string name="title_activity_settings">सेटिंग्स</string>
+    <string name="warning">सावधानी के साथ लाउडनेस एन्हांसर का प्रयोग करें</string>
+    <string name="disableOther">इसे सक्षम करने से पहले अन्य तुल्यकारक अक्षम करें</string>
+    <string name="bass_boost">मंद्र को बढ़ाना</string>
+    <string name="enable_equalizer">तुल्यकारक सक्षम करें</string>
+    <string name="presets">प्रीसेट</string>
+    <string name="virtualizer">वर्चुअलाइज़र</string>
+    <string name="loudness">प्रबलता</string>
+    <string name="about">के बारे में</string>
+</resources>

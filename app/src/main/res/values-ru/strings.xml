@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Equalizer</string>
+    <string name="title_activity_settings">"настройки "</string>
+    <string name="disableOther">Отключите другие эквалайзеры, прежде чем включить это</string>
+    <string name="enable_equalizer">Включить эквалайзер</string>
+    <string name="bass_boost">Усиление басов</string>
+    <string name="presets">пресеты</string>
+    <string name="virtualizer">Virtualizer</string>
+    <string name="loudness">громкость</string>
+    <string name="about">около</string>
+    <string name="warning">Используйте усилитель громкости с осторожностью</string>
+</resources>

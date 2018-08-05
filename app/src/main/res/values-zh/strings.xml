@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Equalizer</string>
+    <string name="title_activity_settings">设置</string>
+    <string name="warning">小心使用响度增强器</string>
+    <string name="disableOther">在启用此功能之前禁用其他均衡器</string>
+    <string name="bass_boost">低音增强</string>
+    <string name="enable_equalizer">启用均衡器</string>
+    <string name="presets">预置</string>
+    <string name="virtualizer">虚拟器</string>
+    <string name="loudness">响度</string>
+    <string name="about">关于</string>
+</resources>

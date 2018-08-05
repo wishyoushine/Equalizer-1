@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Equalizer</string>
+    <string name="title_activity_settings">Paramètres</string>
+    <string name="warning">Utilisez le renforçateur de volume avec précaution</string>
+    <string name="disableOther">Désactiver les autres égaliseurs avant d\'activer cette option</string>
+    <string name="bass_boost">Bass renforcer</string>
+    <string name="enable_equalizer">Activer l\'égaliseur</string>
+    <string name="presets">Presets</string>
+    <string name="virtualizer">Virtualizer</string>
+    <string name="loudness">Intensité</string>
+    <string name="about">Sur</string>
+</resources>

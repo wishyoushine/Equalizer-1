@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Equalizer</string>
+    <string name="title_activity_settings">إعدادات</string>
+    <string name="warning">استخدام محسن الصوت مع الحذر</string>
+    <string name="disableOther">تعطيل معادلات أخرى قبل تمكين هذا</string>
+    <string name="bass_boost">دفعة باس</string>
+    <string name="enable_equalizer"> تمكين المعادل</string>
+    <string name="presets">المسبقة</string>
+    <string name="virtualizer">Virtualizer</string>
+    <string name="loudness">بريق</string>
+    <string name="about">حول</string>
+</resources>

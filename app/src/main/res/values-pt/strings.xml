@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Equalizer</string>
+    <string name="title_activity_settings">Configurações</string>
+    <string name="warning">Use Loudness Enhancer com cuidado</string>
+    <string name="disableOther">Desativar outros equalizadores antes de ativar este</string>
+    <string name="bass_boost">Bass Boost</string>
+    <string name="enable_equalizer">Ativar o equalizador</string>
+    <string name="presets">Predefinições</string>
+    <string name="virtualizer">Virtualizador</string>
+    <string name="loudness">Loudness</string>
+    <string name="about">Sobre</string>
+</resources>
