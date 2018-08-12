@@ -102,10 +102,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         enableLoud.setChecked(true);
         enableBass.setChecked(true);
         enableVirtual.setChecked(true);
-   //     bassSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
-  //      virtualSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
-  //      loudSlider.setProgressColor(ContextCompat.getColor(getBaseContext(), R.color.progress_gray));
-
         eqPreset = new ArrayList<>();
         final ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, eqPreset);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
