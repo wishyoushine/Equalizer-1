@@ -27,9 +27,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
+//import com.google.android.gms.ads.AdRequest;
+//import com.google.android.gms.ads.AdView;
+//import com.google.android.gms.ads.MobileAds;
 import com.marcinmoskala.arcseekbar.ArcSeekBar;
 import com.marcinmoskala.arcseekbar.ProgressListener;
 
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     TextView slider_labels[] = new TextView[MAX_SLIDERS];
     int num_sliders = 0;
     boolean canEnable;
-    private AdView mAdView;
+//    private AdView mAdView;
     ArrayList<String> eqPreset;
     int spinnerPos = 0;
     boolean dontcall = false;
@@ -69,10 +69,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MobileAds.initialize(this, "ca-app-pub-3247504109469111~8021644228");
-        mAdView = (AdView) findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().addTestDevice("9CAE76FEB9BFA8EA6723EEED1660711A").build();
-        mAdView.loadAd(adRequest);
+//        MobileAds.initialize(this, "ca-app-pub-3247504109469111~8021644228");
+//        mAdView = (AdView) findViewById(R.id.adView);
+//        AdRequest adRequest = new AdRequest.Builder().addTestDevice("9CAE76FEB9BFA8EA6723EEED1660711A").build();
+//        mAdView.loadAd(adRequest);
 
 
         enabled = findViewById(R.id.switchEnable);
@@ -106,10 +106,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         final ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, eqPreset);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-
-        eq = new Equalizer(100, 0);
-        bb = new BassBoost(100, 0);
-        virtualizer = new Virtualizer(100, 0);
+        int sesstionId = 563; // 这里是根据正在播放的音乐session id写死的，其实可以通过注册一个静态广播接收器来接收系统发出的：AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION 和 AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION 二个广播来获取当前track的session id（具体见：https://stackoverflow.com/questions/9404776/preferred-way-to-attach-audioeffect-to-global-mix）
+        eq = new Equalizer(0, sesstionId);
+        bb = new BassBoost(0, sesstionId);
+        virtualizer = new Virtualizer(0, sesstionId);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
              loudnessEnhancer=new LoudnessEnhancer(0);
         else {

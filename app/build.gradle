@@ -1,13 +1,12 @@
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.jazibkhan.equalizer"
-        minSdkVersion 15
-        targetSdkVersion 26
+        minSdkVersion 16
+        targetSdkVersion 28
         versionCode 14
         versionName "2.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -33,7 +32,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.github.marcinmoskala:ArcSeekBar:0.31'
     compile 'com.github.medyo:android-about-page:1.2.2'
-    implementation 'com.google.android.gms:play-services-ads:15.0.0'
+    //implementation 'com.google.android.gms:play-services-ads:15.0.0'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.3'
     testCompile 'junit:junit:4.12'
 }
@@ -41,6 +40,3 @@ dependencies {
 repositories {
     maven { url 'https://jitpack.io' }
 }
-
-
-apply plugin: 'com.google.gms.google-services'
