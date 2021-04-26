@@ -2,8 +2,18 @@
 
 buildscript {
     repositories {
-        jcenter()
+        // ali
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+        
+        // 163 wangyi
+        maven { url 'http://mirrors.163.com/maven/repository/maven-central/' }
+        
+        // tencent
+        maven { url 'http://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+        
         google()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.1'
@@ -13,8 +23,18 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
+        // ali
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+        maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+        
+        // 163 wangyi
+        maven { url 'http://mirrors.163.com/maven/repository/maven-central/' }
+        
+        // tencent
+        maven { url 'http://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+        
         google()
+        jcenter()
     }
 }
 

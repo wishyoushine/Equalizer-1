@@ -106,7 +106,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         final ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, eqPreset);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        int sesstionId = 563; // 这里是根据正在播放的音乐session id写死的，其实可以通过注册一个静态广播接收器来接收系统发出的：AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION 和 AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION 二个广播来获取当前track的session id（具体见：https://stackoverflow.com/questions/9404776/preferred-way-to-attach-audioeffect-to-global-mix）
+        // 以下代码在pixel3上能正常运行（测试： qreq bd sesstionId），下面的 sesstionId 是根据正在播放的音乐session id写死的，其实可以通过注册一个静态广播接收器来接收系统发出的：AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION 和 AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION 二个广播来获取当前track的session id（具体见：https://stackoverflow.com/questions/9404776/preferred-way-to-attach-audioeffect-to-global-mix）
+        int sesstionId = 33;
         eq = new Equalizer(0, sesstionId);
         bb = new BassBoost(0, sesstionId);
         virtualizer = new Virtualizer(0, sesstionId);
